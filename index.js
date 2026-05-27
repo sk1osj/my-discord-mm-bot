@@ -8,7 +8,7 @@ const client = new Client({
   ]
 });
 
-client.once("clientReady", () => {
+client.once("ready", () => {
   console.log("MM Bot Online");
 });
 
@@ -40,15 +40,14 @@ client.on("messageCreate", async (message) => {
     return message.channel.send({ embeds: [embed] });
   }
 
-  // 🤝 DEAL SYSTEM (רמה בסיסית)
+  // 🤝 DEAL SYSTEM
   if (message.content.startsWith("!deal")) {
 
     const args = message.content.split(" ");
-
     const buyer = args[1] || "N/A";
     const seller = args[2] || "N/A";
 
-    message.channel.send(`
+    return message.channel.send(`
 🤝 **New MM Deal**
 
 👤 Buyer: ${buyer}
