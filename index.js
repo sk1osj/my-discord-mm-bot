@@ -1,23 +1,4 @@
-const express = require("express");
-const {
-  Client,
-  GatewayIntentBits,
-  PermissionsBitField,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ChannelType
-} = require("discord.js");
-
-const app = express();
-
-app.get("/", (req, res) => {
-  res.send("Bot is alive!");
-});
-
-app.listen(process.env.PORT || 3000, () => {
-  console.log("Web server running.");
-});
+const { Client, GatewayIntentBits, EmbedBuilder } = require("discord.js");
 
 const client = new Client({
   intents: [
@@ -28,71 +9,54 @@ const client = new Client({
 });
 
 client.once("clientReady", () => {
-  console.log("Bot is online!");
+  console.log("MM Bot Online");
 });
 
 client.on("messageCreate", async (message) => {
 
   if (message.author.bot) return;
-if (message.content === "!deal") {
 
-  await message.channel.send(`
-🤝 New MM Deal Started
+  // 🎛️ MM PANEL
+  if (message.content === "!mm") {
 
-Buyer: TBD
-Seller: TBD
-Price: TBD
-Status: Pending
-  `);
+    const embed = new EmbedBuilder()
+      .setTitle("kdkwow mm")
+      .setColor(0x2b2d31)
+      .setDescription(`
+> **Auto Middleman Service**
 
-}
-  if (message.content === "!panel") {
+💰 Fees:
+- $250+ → $1.50
+- under $250 → $0.50
+- under $50 → FREE
 
-    const button = new ButtonBuilder()
-      .setCustomId("open_ticket")
-      .setLabel("🎫 Open Ticket")
-      .setStyle(ButtonStyle.Primary);
+💳 Payments:
+- Litecoin (LTC)
+- USDT (BEP20)
 
-    const row = new ActionRowBuilder().addComponents(button);
+⚠️ Read ToS before using service
+      `);
 
-    await message.channel.send({
-      content: "Click below to open a ticket.",
-      components: [row]
-    });
+    return message.channel.send({ embeds: [embed] });
   }
-});
 
-client.on("interactionCreate", async (interaction) => {
+  // 🤝 DEAL SYSTEM (רמה בסיסית)
+  if (message.content.startsWith("!deal")) {
 
-  if (!interaction.isButton()) return;
+    const args = message.content.split(" ");
 
-  if (interaction.customId === "open_ticket") {
+    const buyer = args[1] || "N/A";
+    const seller = args[2] || "N/A";
 
-    const channel = await interaction.guild.channels.create({
-      name: `ticket-${interaction.user.username}`,
-      type: ChannelType.GuildText,
-      permissionOverwrites: [
-        {
-          id: interaction.guild.id,
-          deny: [PermissionsBitField.Flags.ViewChannel]
-        },
-        {
-          id: interaction.user.id,
-          allow: [
-            PermissionsBitField.Flags.ViewChannel,
-            PermissionsBitField.Flags.SendMessages
-          ]
-        }
-      ]
-    });
+    message.channel.send(`
+🤝 **New MM Deal**
 
-    await channel.send(`🎫 Welcome ${interaction.user}`);
-
-    await interaction.reply({
-      content: `Ticket created: ${channel}`,
-      ephemeral: true
-    });
+👤 Buyer: ${buyer}
+👤 Seller: ${seller}
+📊 Status: Pending
+    `);
   }
+
 });
 
 client.login(process.env.TOKEN);
