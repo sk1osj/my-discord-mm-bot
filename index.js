@@ -34,7 +34,18 @@ client.once("clientReady", () => {
 client.on("messageCreate", async (message) => {
 
   if (message.author.bot) return;
+if (message.content === "!deal") {
 
+  await message.channel.send(`
+🤝 New MM Deal Started
+
+Buyer: TBD
+Seller: TBD
+Price: TBD
+Status: Pending
+  `);
+
+}
   if (message.content === "!panel") {
 
     const button = new ButtonBuilder()
