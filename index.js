@@ -25,52 +25,42 @@ const client = new Client({
   ]
 });
 
-// =======================
-// BOT READY
-// =======================
 client.once("ready", async () => {
-  console.log("Bot Online");
+  console.log("MM Bot Online");
 
-  const channelId = "1509120462356090890";
-
-  const channel = await client.channels.fetch(channelId).catch(() => null);
+  const channel = await client.channels.fetch("1509120462356090890").catch(() => null);
   if (!channel) return;
 
   const embed = new EmbedBuilder()
     .setTitle("Middleman Service")
     .setColor(0x2b2d31)
     .setDescription(`
+Middleman System
+
 Fees:
 $250+ -> $1.50
 $50 - $250 -> $0.50
-Under $50 -> Free
+Under $50 -> FREE
 
-Press the button below to open a ticket
-    `);
+Press the button to open MM ticket
+`);
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
-      .setCustomId("open_ticket")
-      .setLabel("Open Ticket")
+      .setCustomId("open_mm")
+      .setLabel("Open Middleman")
       .setStyle(ButtonStyle.Success)
   );
 
-  await channel.send({
-    embeds: [embed],
-    components: [row]
-  });
+  await channel.send({ embeds: [embed], components: [row] });
 });
 
-// =======================
-// BUTTON SYSTEM
-// =======================
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isButton()) return;
 
-  // OPEN TICKET
-  if (interaction.customId === "open_ticket") {
+  if (interaction.customId === "open_mm") {
     const channel = await interaction.guild.channels.create({
-      name: `ticket-${interaction.user.username}`,
+      name: `mm-${interaction.user.username}`,
       permissionOverwrites: [
         {
           id: interaction.guild.id,
@@ -89,25 +79,24 @@ client.on("interactionCreate", async (interaction) => {
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId("close_ticket")
-        .setLabel("Close Ticket")
+        .setCustomId("close_mm")
+        .setLabel("Close MM")
         .setStyle(ButtonStyle.Danger)
     );
 
     await channel.send({
-      content: `Welcome ${interaction.user}`,
+      content: `Middleman started for ${interaction.user}`,
       components: [row]
     });
 
     return interaction.reply({
-      content: `Ticket created: ${channel}`,
+      content: `MM ticket created: ${channel}`,
       ephemeral: true
     });
   }
 
-  // CLOSE TICKET
-  if (interaction.customId === "close_ticket") {
-    await interaction.reply("Closing ticket...");
+  if (interaction.customId === "close_mm") {
+    await interaction.reply("Closing MM...");
     setTimeout(() => interaction.channel.delete().catch(() => {}), 2000);
   }
 });
