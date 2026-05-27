@@ -7,7 +7,15 @@ app.get("/", (req, res) => {
 
 app.listen(process.env.PORT || 3000);
 
-const { Client, GatewayIntentBits, EmbedBuilder } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  PermissionsBitField
+} = require("discord.js");
 
 const client = new Client({
   intents: [
@@ -21,13 +29,11 @@ client.once("ready", () => {
   console.log("MM Bot Online");
 });
 
+// 🎛️ MM PANEL
 client.on("messageCreate", async (message) => {
-
   if (message.author.bot) return;
 
-  // 🎛️ MM PANEL
   if (message.content === "!mm") {
-
     const embed = new EmbedBuilder()
       .setTitle("kdkwow mm")
       .setColor(0x2b2d31)
@@ -35,36 +41,74 @@ client.on("messageCreate", async (message) => {
 🤝 Auto Middleman Service
 
 💰 Fees:
-- $250+ → $1.50
-- under $250 → $0.50
-- under $50 → FREE
+$250+ → $1.50
+under $250 → $0.50
+under $50 → FREE
 
-💳 Payments:
-- Litecoin (LTC)
-- USDT (BEP20)
+💳 LTC / USDT (BEP20)
 
-⚠️ Read ToS before using service
+🎫 Press button to open ticket
       `);
 
-    return message.channel.send({ embeds: [embed] });
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("open_ticket")
+        .setLabel("🎫 Open Ticket")
+        .setStyle(ButtonStyle.Success)
+    );
+
+    return message.channel.send({ embeds: [embed], components: [row] });
+  }
+});
+
+// 🔘 TICKETS
+client.on("interactionCreate", async (interaction) => {
+
+  if (!interaction.isButton()) return;
+
+  // OPEN TICKET
+  if (interaction.customId === "open_ticket") {
+
+    const channel = await interaction.guild.channels.create({
+      name: `ticket-${interaction.user.username}`,
+      permissionOverwrites: [
+        {
+          id: interaction.guild.id,
+          deny: [PermissionsBitField.Flags.ViewChannel]
+        },
+        {
+          id: interaction.user.id,
+          allow: [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages
+          ]
+        }
+      ]
+    });
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("close_ticket")
+        .setLabel("❌ Close")
+        .setStyle(ButtonStyle.Danger)
+    );
+
+    await channel.send({
+      content: `Welcome ${interaction.user}`,
+      components: [row]
+    });
+
+    return interaction.reply({
+      content: `Ticket created: ${channel}`,
+      ephemeral: true
+    });
   }
 
-  // 🤝 DEAL SYSTEM
-  if (message.content.startsWith("!deal")) {
-
-    const args = message.content.split(" ");
-    const buyer = args[1] || "N/A";
-    const seller = args[2] || "N/A";
-
-    return message.channel.send(`
-🤝 **New MM Deal**
-
-👤 Buyer: ${buyer}
-👤 Seller: ${seller}
-📊 Status: Pending
-    `);
+  // CLOSE TICKET
+  if (interaction.customId === "close_ticket") {
+    await interaction.reply("Closing ticket...");
+    setTimeout(() => interaction.channel.delete(), 2000);
   }
-
 });
 
 client.login(process.env.TOKEN);
