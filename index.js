@@ -25,44 +25,50 @@ const client = new Client({
   ]
 });
 
-client.once("ready", () => {
-  console.log("MM Bot Online");
+// =======================
+// BOT READY
+// =======================
+client.once("ready", async () => {
+  console.log("Bot Online");
 
-  // 🔥 שים כאן את ה-Channel ID שלך
-  const channel = client.channels.cache.get("PUT_CHANNEL_ID_HERE");
+  const channelId = "1509120462356090890";
 
+  const channel = await client.channels.fetch(channelId).catch(() => null);
   if (!channel) return;
 
   const embed = new EmbedBuilder()
-    .setTitle("🤝 Middleman Service")
+    .setTitle("Middleman Service")
     .setColor(0x2b2d31)
     .setDescription(`
-💰 Fees:
-$250+ → $1.50
-under $250 → $0.50
-under $50 → FREE
+Fees:
+$250+ -> $1.50
+$50 - $250 -> $0.50
+Under $50 -> Free
 
-🎫 Press the button below to open a ticket
+Press the button below to open a ticket
     `);
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId("open_ticket")
-      .setLabel("🎫 Open Ticket")
+      .setLabel("Open Ticket")
       .setStyle(ButtonStyle.Success)
   );
 
-  channel.send({ embeds: [embed], components: [row] });
+  await channel.send({
+    embeds: [embed],
+    components: [row]
+  });
 });
 
-// 🎛️ BUTTON SYSTEM
+// =======================
+// BUTTON SYSTEM
+// =======================
 client.on("interactionCreate", async (interaction) => {
-
   if (!interaction.isButton()) return;
 
   // OPEN TICKET
   if (interaction.customId === "open_ticket") {
-
     const channel = await interaction.guild.channels.create({
       name: `ticket-${interaction.user.username}`,
       permissionOverwrites: [
@@ -74,7 +80,8 @@ client.on("interactionCreate", async (interaction) => {
           id: interaction.user.id,
           allow: [
             PermissionsBitField.Flags.ViewChannel,
-            PermissionsBitField.Flags.SendMessages
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.ReadMessageHistory
           ]
         }
       ]
@@ -83,7 +90,7 @@ client.on("interactionCreate", async (interaction) => {
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId("close_ticket")
-        .setLabel("❌ Close")
+        .setLabel("Close Ticket")
         .setStyle(ButtonStyle.Danger)
     );
 
@@ -101,7 +108,7 @@ client.on("interactionCreate", async (interaction) => {
   // CLOSE TICKET
   if (interaction.customId === "close_ticket") {
     await interaction.reply("Closing ticket...");
-    setTimeout(() => interaction.channel.delete(), 2000);
+    setTimeout(() => interaction.channel.delete().catch(() => {}), 2000);
   }
 });
 
