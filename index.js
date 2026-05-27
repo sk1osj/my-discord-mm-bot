@@ -27,41 +27,35 @@ const client = new Client({
 
 client.once("ready", () => {
   console.log("MM Bot Online");
-});
 
-// 🎛️ MM PANEL
-client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
+  // 🔥 שים כאן את ה-Channel ID שלך
+  const channel = client.channels.cache.get("PUT_CHANNEL_ID_HERE");
 
-  if (message.content === "!mm") {
-    const embed = new EmbedBuilder()
-      .setTitle("kdkwow mm")
-      .setColor(0x2b2d31)
-      .setDescription(`
-🤝 Auto Middleman Service
+  if (!channel) return;
 
+  const embed = new EmbedBuilder()
+    .setTitle("🤝 Middleman Service")
+    .setColor(0x2b2d31)
+    .setDescription(`
 💰 Fees:
 $250+ → $1.50
 under $250 → $0.50
 under $50 → FREE
 
-💳 LTC / USDT (BEP20)
+🎫 Press the button below to open a ticket
+    `);
 
-🎫 Press button to open ticket
-      `);
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId("open_ticket")
+      .setLabel("🎫 Open Ticket")
+      .setStyle(ButtonStyle.Success)
+  );
 
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("open_ticket")
-        .setLabel("🎫 Open Ticket")
-        .setStyle(ButtonStyle.Success)
-    );
-
-    return message.channel.send({ embeds: [embed], components: [row] });
-  }
+  channel.send({ embeds: [embed], components: [row] });
 });
 
-// 🔘 TICKETS
+// 🎛️ BUTTON SYSTEM
 client.on("interactionCreate", async (interaction) => {
 
   if (!interaction.isButton()) return;
