@@ -40,9 +40,15 @@ client.once("clientReady", async () => {
   panelSent.add(MM_CHANNEL);
 
   const embed = new EmbedBuilder()
-    .setTitle("MM System")
+    .setTitle("kdkwow MM System")
     .setColor(0x2b2d31)
-    .setDescription("Click the button below to start");
+    .setDescription(`
+Deals $250+ → $1.50
+Deals under $250 → $0.50
+Deals under $50 → FREE
+
+Click below to start MM
+`);
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -51,7 +57,10 @@ client.once("clientReady", async () => {
       .setStyle(ButtonStyle.Success)
   );
 
-  await channel.send({ embeds: [embed], components: [row] });
+  await channel.send({
+    embeds: [embed],
+    components: [row]
+  });
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
@@ -61,14 +70,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     if (activeTickets.has(interaction.user.id)) {
       return interaction.reply({
-        content: "You already have an open ticket.",
+        content: "You already have an open MM ticket.",
         ephemeral: true
       });
     }
 
     const guild = interaction.guild;
 
-    const channel = await guild.channels.create({
+    const ticketChannel = await guild.channels.create({
       name: `mm-${interaction.user.username}`,
       permissionOverwrites: [
         {
@@ -86,24 +95,27 @@ client.on(Events.InteractionCreate, async (interaction) => {
       ]
     });
 
-    activeTickets.set(interaction.user.id, channel.id);
+    activeTickets.set(interaction.user.id, ticketChannel.id);
 
-    const embed = new EmbedBuilder()
+    const ticketEmbed = new EmbedBuilder()
       .setTitle("MM Ticket")
       .setColor(0x2b2d31)
-      .setDescription("Session started");
+      .setDescription("Middleman session started.");
 
-    const row = new ActionRowBuilder().addComponents(
+    const closeRow = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId("close_mm")
         .setLabel("Close")
         .setStyle(ButtonStyle.Danger)
     );
 
-    await channel.send({ embeds: [embed], components: [row] });
+    await ticketChannel.send({
+      embeds: [ticketEmbed],
+      components: [closeRow]
+    });
 
     return interaction.reply({
-      content: `Created: ${channel}`,
+      content: `Created: ${ticketChannel}`,
       ephemeral: true
     });
   }
@@ -117,8 +129,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
     }
 
-    await interaction.reply("Closing...");
-    setTimeout(() => interaction.channel.delete().catch(() => {}), 2000);
+    await interaction.reply({
+      content: "Closing...",
+      ephemeral: true
+    });
+
+    setTimeout(() => {
+      interaction.channel.delete().catch(() => {});
+    }, 2000);
   }
 });
 
