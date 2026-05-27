@@ -1,5 +1,13 @@
 const express = require("express");
-const { Client, GatewayIntentBits } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  PermissionsBitField,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ChannelType
+} = require("discord.js");
 
 const app = express();
 
@@ -23,11 +31,56 @@ client.once("clientReady", () => {
   console.log("Bot is online!");
 });
 
-client.on("messageCreate", (message) => {
+client.on("messageCreate", async (message) => {
+
   if (message.author.bot) return;
 
-  if (message.content === "!ping") {
-    message.reply("pong 🤖");
+  if (message.content === "!panel") {
+
+    const button = new ButtonBuilder()
+      .setCustomId("open_ticket")
+      .setLabel("🎫 Open Ticket")
+      .setStyle(ButtonStyle.Primary);
+
+    const row = new ActionRowBuilder().addComponents(button);
+
+    await message.channel.send({
+      content: "Click below to open a ticket.",
+      components: [row]
+    });
+  }
+});
+
+client.on("interactionCreate", async (interaction) => {
+
+  if (!interaction.isButton()) return;
+
+  if (interaction.customId === "open_ticket") {
+
+    const channel = await interaction.guild.channels.create({
+      name: `ticket-${interaction.user.username}`,
+      type: ChannelType.GuildText,
+      permissionOverwrites: [
+        {
+          id: interaction.guild.id,
+          deny: [PermissionsBitField.Flags.ViewChannel]
+        },
+        {
+          id: interaction.user.id,
+          allow: [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages
+          ]
+        }
+      ]
+    });
+
+    await channel.send(`🎫 Welcome ${interaction.user}`);
+
+    await interaction.reply({
+      content: `Ticket created: ${channel}`,
+      ephemeral: true
+    });
   }
 });
 
