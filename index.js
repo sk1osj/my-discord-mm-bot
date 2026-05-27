@@ -83,4 +83,39 @@ client.on(Events.InteractionCreate, async (interaction) => {
       ]
     });
 
-    activeTickets.set
+    activeTickets.set(interaction.user.id, channel.id);
+
+    const embed = new EmbedBuilder()
+      .setTitle("MM Ticket")
+      .setColor(0x2b2d31)
+      .setDescription("Session started");
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("close_mm")
+        .setLabel("Close")
+        .setStyle(ButtonStyle.Danger)
+    );
+
+    await channel.send({ embeds: [embed], components: [row] });
+
+    return interaction.reply({
+      content: `Created: ${channel}`,
+      ephemeral: true
+    });
+  }
+
+  if (interaction.customId === "close_mm") {
+    for (const [userId, channelId] of activeTickets) {
+      if (channelId === interaction.channel.id) {
+        activeTickets.delete(userId);
+        break;
+      }
+    }
+
+    await interaction.reply("Closing...");
+    setTimeout(() => interaction.channel.delete().catch(() => {}), 2000);
+  }
+});
+
+client.login(process.env.TOKEN);
