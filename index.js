@@ -1,3 +1,12 @@
+const express = require("express");
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("Bot is alive");
+});
+
+app.listen(process.env.PORT || 3000);
+
 const { Client, GatewayIntentBits, EmbedBuilder } = require("discord.js");
 
 const client = new Client({
@@ -23,7 +32,7 @@ client.on("messageCreate", async (message) => {
       .setTitle("kdkwow mm")
       .setColor(0x2b2d31)
       .setDescription(`
-> **Auto Middleman Service**
+🤝 Auto Middleman Service
 
 💰 Fees:
 - $250+ → $1.50
