@@ -30,7 +30,9 @@ const MM_CHANNEL = "1509120462356090890";
 const panelSent = new Set();
 const activeTickets = new Map();
 
-client.once("ready", async () => {
+client.once("clientReady", async () => {
+  console.log("MM Bot Online");
+
   const channel = await client.channels.fetch(MM_CHANNEL).catch(() => null);
   if (!channel) return;
 
@@ -56,6 +58,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isButton()) return;
 
   if (interaction.customId === "start_mm") {
+
     if (activeTickets.has(interaction.user.id)) {
       return interaction.reply({
         content: "You already have an open ticket.",
@@ -106,6 +109,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (interaction.customId === "close_mm") {
+
     for (const [userId, channelId] of activeTickets) {
       if (channelId === interaction.channel.id) {
         activeTickets.delete(userId);
